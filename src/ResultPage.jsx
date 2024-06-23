@@ -62,8 +62,8 @@ const ResultPage = ({ studentID, setStudentID }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="border-2 m-4" id="print">
-      <div className="m-4">
+    <div className="border-2 m-4">
+      <div className="m-4" id="print">
         {/* result card header */}
         <div className="flex justify-around items-center mb-10">
           <img src={diuLogo} alt="diuLogo" className="h-4 md:h-10 w-30" />
