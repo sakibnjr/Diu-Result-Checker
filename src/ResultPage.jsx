@@ -1,12 +1,10 @@
-import React from "react";
 import diuLogo from "/src/assets/diu.png";
 import useFetch from "./useFetch";
 import ResultTable from "./ResultTable";
 import StudentInfoTable from "./StudentInfoTable";
 import Loader from "./Loader";
 import { useNavigate } from "react-router-dom";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+import { useState, useEffect } from "react";
 
 const ResultPage = ({ studentID, setStudentID }) => {
   const {
@@ -26,40 +24,53 @@ const ResultPage = ({ studentID, setStudentID }) => {
       studentID
   );
 
-  const navigate = useNavigate();
+  let cgpaGrade =
+    result && result.length > 0
+      ? Math.max(...result.map((item) => item.cgpa))
+      : "---";
 
-  const handleSavePDF = () => {
-    const input = document.getElementById("print");
-    if (!input) {
-      console.error("Element with id 'print' not found");
-      return;
+  const [gradeLetter, setGradeLetter] = useState("...");
+
+  function calculateGrade(point) {
+    if (point >= 4.0) {
+      setGradeLetter("A+");
+    } else if (point >= 3.75) {
+      setGradeLetter("A");
+    } else if (point >= 3.5) {
+      setGradeLetter("A-");
+    } else if (point >= 3.25) {
+      setGradeLetter("B+");
+    } else if (point >= 3.0) {
+      setGradeLetter("B");
+    } else if (point >= 2.75) {
+      setGradeLetter("B-");
+    } else if (point >= 2.5) {
+      setGradeLetter("C+");
+    } else if (point >= 2.25) {
+      setGradeLetter("C");
+    } else if (point >= 2.0) {
+      setGradeLetter("D");
+    } else {
+      setGradeLetter("F");
     }
-    console.log("Starting PDF generation");
+  }
 
-    html2canvas(input)
-      .then((canvas) => {
-        console.log("Canvas created");
-        const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF("p", "mm", "a4");
-        const imgWidth = 210;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-        pdf.save("result.pdf");
-        console.log("PDF saved");
-      })
-      .catch((error) => {
-        console.error("Error generating PDF", error);
-      });
-  };
+  useEffect(() => {
+    calculateGrade(cgpaGrade);
+  }, [cgpaGrade]);
+
+  const navigate = useNavigate();
 
   return (
     <div className="border-2 m-4" id="print">
       <div className="m-4">
         {/* result card header */}
-        <div className="flex justify-between items-center mb-10">
+        <div className="flex justify-around items-center mb-10">
           <img src={diuLogo} alt="diuLogo" className="h-4 md:h-10 w-30" />
-          <h1 className="md:text-3xl">Academic Result</h1>
-          <p className="text-2xl md:text-4xl rotate-16 text-rose-600">A+</p>
+          <h1 className="md:text-4xl">Academic Result</h1>
+          <p className="text-2xl md:text-4xl rotate-16 text-rose-600">
+            {gradeLetter}
+          </p>
         </div>
         {/* student information */}
         <div className="mb-10">
@@ -82,11 +93,9 @@ const ResultPage = ({ studentID, setStudentID }) => {
           {result && <ResultTable result={result} />}
         </div>
       </div>
-      <div className="flex justify-evenly mb-2">
-        <button className="btn btn-primary" onClick={handleSavePDF}>
-          Save PDF
-        </button>
-        <button className="btn btn-warning">Compare Result</button>
+      <div className="flex flex-col md:flex-row gap-2 justify-evenly mb-2 mx-4">
+        <button className="btn btn-primary">Save PDF</button>
+        <button className="btn btn-warning ">Compare Result</button>
         <button
           className="btn btn-outline"
           onClick={() => {
